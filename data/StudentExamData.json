@@ -1,0 +1,78 @@
+{
+  "students": [
+    {
+      "id": 108,
+      "firstName": "Lianne",
+      "lastName": "Gray",
+      "intakeYear": "2023",
+      "ChosenSubject": "Japanese Language",
+      "NumberExamsEnrolled": 4,
+      "SubjectExams": [
+        {
+          "name": "Japanese Language 1",
+          "taken": true,
+          "grade": 60,
+          "result": "Pass"
+        },
+        {
+          "name": "Introduction to Japanese Culture",
+          "taken": false,
+          "grade": "",
+          "result": ""
+        },
+        {
+          "name": "Japanese History 1",
+          "taken": false,
+          "grade": "",
+          "result": ""
+        },
+        {
+          "name": "The Body and the Extremity of the Senses: Through Japanese Literature, Performance and Media Arts",
+          "taken": false,
+          "grade": "",
+          "result": ""
+        }
+      ]
+    },
+    {
+      "id": 257,
+      "firstName": "Anastasia",
+      "lastName": "Zavrak",
+      "intakeYear": "2023",
+      "ChosenSubject": "Japanese Language",
+      "NumberExamsEnrolled": 5,
+      "SubjectExams": [
+        {
+          "name": "Japanese Language 1",
+          "taken": true,
+          "grade": 60,
+          "result": "Pass"
+        },
+        {
+          "name": "Introduction to Japanese Culture",
+          "taken": false,
+          "grade": "",
+          "result": ""
+        },
+        {
+          "name": "Japanese History 1",
+          "taken": false,
+          "grade": "",
+          "result": ""
+        },
+        {
+          "name": "The Body and the Extremity of the Senses: Through Japanese Literature, Performance and Media Arts",
+          "taken": false,
+          "grade": "",
+          "result": ""
+        },
+        {
+          "name": "An Introduction to Japanese Cinema",
+          "taken": false,
+          "grade": "",
+          "result": ""
+        }
+      ]
+    }
+  ]
+}
