@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Children 0–17 by Age &amp; Gender – Barnsley</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+h1, h2, h3, h4,
+.chart-col-hdr, .geo-label, .source-note {
+  font-family: 'Segoe UI Semibold', 'Segoe UI', sans-serif;
+  font-weight: 600;
+}
+html, body {
+  width: 100%; height: 100%; overflow: hidden;
+  background: #ffffff; color: #1e1e2e;
+  font-family: 'Segoe UI', sans-serif;
+  display: flex; flex-direction: column;
+}
+
+/* ── Header ── */
+#header {
+  padding: 10px 18px 6px;
+  flex-shrink: 0;
+  border-bottom: 2px solid #f1f5f9;
+}
+#header h1 {
+  font-size: 14px; color: #360071;
+  letter-spacing: -0.01em; margin-bottom: 2px;
+}
+#geo-subtitle {
+  font-size: 11px; color: #64748b;
+}
+
+/* ── Chart wrapper ── */
+#chart-area {
+  flex: 1; min-height: 0;
+  padding: 8px 14px 4px;
+  display: flex; flex-direction: column;
+  overflow: hidden;
+}
+
+/* ── Column headers ── */
+.col-headers {
+  display: grid;
+  grid-template-columns: 45% 10% 45%;
+  margin-bottom: 4px;
+  flex-shrink: 0;
+}
+.chart-col-hdr {
+  font-size: 11px; letter-spacing: 0.04em; text-transform: uppercase;
+}
+.chart-col-hdr.male   { color: #0061AD;   text-align: right; padding-right: 6px; }
+.chart-col-hdr.age-lbl{ color: #94a3b8; text-align: center; font-size: 9px; }
+.chart-col-hdr.female { color: #4F1F6A; text-align: left;  padding-left: 6px; }
+
+/* ── Pyramid rows ── */
+#pyramid {
+  flex: 1; min-height: 0;
+  display: flex; flex-direction: column;
+  gap: 3px;
+  overflow: hidden;
+}
+.age-row {
+  display: grid;
+  grid-template-columns: 45% 10% 45%;
+  flex: 1; min-height: 0;
+  align-items: center;
+}
+
+/* Male side — bars grow LEFT (flex row-reverse) */
+.male-cell {
+  display: flex; flex-direction: row-reverse;
+  align-items: center; height: 100%;
+  position: relative;
+}
+.male-bar {
+  height: 22px; max-height: 100%;
+  background: #0061AD;
+  border-radius: 3px 0 0 3px;
+  transition: width 0.55s ease;
+  display: flex; align-items: center; justify-content: flex-start;
+  overflow: visible; position: relative;
+  min-width: 0;
+}
+.male-bar-lbl {
+  font-size: 10px; font-weight: 600; color: white;
+  padding-left: 4px; white-space: nowrap;
+  pointer-events: none;
+}
+.male-bar-lbl.outside {
+  color: #0061AD; padding-left: 0; margin-right: 3px;
+  position: absolute; right: 100%;
+}
+
+/* Age label — center column */
+.age-lbl-cell {
+  text-align: center; font-size: 10px; color: #64748b; font-weight: 600;
+}
+
+/* Female side — bars grow RIGHT */
+.female-cell {
+  display: flex; flex-direction: row;
+  align-items: center; height: 100%;
+}
+.female-bar {
+  height: 22px; max-height: 100%;
+  background: #4F1F6A;
+  border-radius: 0 3px 3px 0;
+  transition: width 0.55s ease;
+  display: flex; align-items: center; justify-content: flex-end;
+  overflow: visible; position: relative;
+  min-width: 0;
+}
+.female-bar-lbl {
+  font-size: 10px; font-weight: 600; color: white;
+  padding-right: 4px; white-space: nowrap;
+  pointer-events: none;
+}
+.female-bar-lbl.outside {
+  color: #4F1F6A; padding-right: 0; margin-left: 3px;
+  position: absolute; left: 100%;
+}
+
+/* ── Legend / footer ── */
+#footer {
+  flex-shrink: 0;
+  padding: 5px 14px 6px;
+  border-top: 1px solid #f1f5f9;
+  display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+}
+.legend-dot {
+  display: inline-block; width: 10px; height: 10px;
+  border-radius: 50%; flex-shrink: 0;
+}
+.legend-item {
+  display: flex; align-items: center; gap: 5px;
+  font-size: 11px; color: #475569;
+}
+.legend-item strong { color: #1e1e2e; font-weight: 700; }
+.source-note {
+  margin-left: auto; font-size: 10px; color: #94a3b8;
+}
+</style>
+</head>
+<body>
+
+<div id="header">
+  <h1>Children 0&#8211;17 by Age &amp; Gender</h1>
+  <div id="geo-subtitle">Loading…</div>
+</div>
+
+<div id="chart-area">
+  <div class="col-headers">
+    <div class="chart-col-hdr male">Male</div>
+    <div class="chart-col-hdr age-lbl">Age</div>
+    <div class="chart-col-hdr female">Female</div>
+  </div>
+  <div id="pyramid"></div>
+</div>
+
+<div id="footer">
+  <div class="legend-item">
+    <span class="legend-dot" style="background:#0061AD"></span>
+    <span>Male — total: <strong id="total-male">0</strong></span>
+  </div>
+  <div class="legend-item">
+    <span class="legend-dot" style="background:#4F1F6A"></span>
+    <span>Female — total: <strong id="total-female">0</strong></span>
+  </div>
+  <div class="source-note">Source: ONS mid-year population estimates 2024</div>
+</div>
+
+<script>
+const ALL_DATA = {"South": {"15": {"Male": 279, "Female": 262}, "16": {"Male": 279, "Female": 258}, "17": {"Male": 274, "Female": 249}, "0": {"Male": 234, "Female": 236}, "1": {"Male": 253, "Female": 236}, "2": {"Male": 265, "Female": 249}, "3": {"Male": 252, "Female": 260}, "4": {"Male": 295, "Female": 257}, "5": {"Male": 265, "Female": 263}, "6": {"Male": 268, "Female": 255}, "7": {"Male": 285, "Female": 263}, "8": {"Male": 270, "Female": 269}, "9": {"Male": 275, "Female": 265}, "10": {"Male": 270, "Female": 261}, "11": {"Male": 283, "Female": 281}, "12": {"Male": 278, "Female": 279}, "13": {"Male": 299, "Female": 272}, "14": {"Male": 282, "Female": 273}}, "North": {"15": {"Male": 276, "Female": 258}, "16": {"Male": 276, "Female": 255}, "17": {"Male": 271, "Female": 246}, "0": {"Male": 219, "Female": 221}, "1": {"Male": 237, "Female": 221}, "2": {"Male": 248, "Female": 233}, "3": {"Male": 236, "Female": 244}, "4": {"Male": 276, "Female": 240}, "5": {"Male": 251, "Female": 249}, "6": {"Male": 254, "Female": 242}, "7": {"Male": 271, "Female": 250}, "8": {"Male": 256, "Female": 255}, "9": {"Male": 261, "Female": 251}, "10": {"Male": 262, "Female": 254}, "11": {"Male": 275, "Female": 273}, "12": {"Male": 270, "Female": 271}, "13": {"Male": 291, "Female": 265}, "14": {"Male": 274, "Female": 266}}, "North East": {"15": {"Male": 409, "Female": 384}, "16": {"Male": 409, "Female": 378}, "17": {"Male": 403, "Female": 365}, "0": {"Male": 345, "Female": 348}, "1": {"Male": 373, "Female": 348}, "2": {"Male": 390, "Female": 366}, "3": {"Male": 370, "Female": 383}, "4": {"Male": 434, "Female": 378}, "5": {"Male": 406, "Female": 403}, "6": {"Male": 411, "Female": 391}, "7": {"Male": 438, "Female": 404}, "8": {"Male": 414, "Female": 412}, "9": {"Male": 422, "Female": 406}, "10": {"Male": 400, "Female": 388}, "11": {"Male": 419, "Female": 416}, "12": {"Male": 413, "Female": 414}, "13": {"Male": 443, "Female": 404}, "14": {"Male": 418, "Female": 405}}, "Central": {"15": {"Male": 390, "Female": 366}, "16": {"Male": 390, "Female": 361}, "17": {"Male": 383, "Female": 349}, "0": {"Male": 324, "Female": 327}, "1": {"Male": 350, "Female": 325}, "5": {"Male": 368, "Female": 366}, "6": {"Male": 373, "Female": 354}, "7": {"Male": 397, "Female": 366}, "8": {"Male": 375, "Female": 374}, "9": {"Male": 383, "Female": 368}, "10": {"Male": 367, "Female": 356}, "11": {"Male": 385, "Female": 382}, "12": {"Male": 379, "Female": 379}, "13": {"Male": 407, "Female": 371}, "14": {"Male": 384, "Female": 372}, "2": {"Male": 365, "Female": 344}, "3": {"Male": 347, "Female": 359}, "4": {"Male": 407, "Female": 354}}, "Penistone": {"15": {"Male": 153, "Female": 143}, "16": {"Male": 153, "Female": 141}, "17": {"Male": 150, "Female": 136}, "0": {"Male": 102, "Female": 103}, "1": {"Male": 110, "Female": 102}, "2": {"Male": 115, "Female": 108}, "3": {"Male": 109, "Female": 113}, "4": {"Male": 128, "Female": 111}, "5": {"Male": 140, "Female": 139}, "6": {"Male": 142, "Female": 135}, "7": {"Male": 151, "Female": 139}, "8": {"Male": 143, "Female": 143}, "9": {"Male": 146, "Female": 140}, "10": {"Male": 160, "Female": 156}, "11": {"Male": 168, "Female": 167}, "12": {"Male": 166, "Female": 166}, "13": {"Male": 178, "Female": 162}, "14": {"Male": 168, "Female": 163}}, "Dearne": {"15": {"Male": 155, "Female": 145}, "16": {"Male": 155, "Female": 143}, "17": {"Male": 152, "Female": 138}, "0": {"Male": 148, "Female": 149}, "1": {"Male": 160, "Female": 149}, "2": {"Male": 167, "Female": 157}, "3": {"Male": 159, "Female": 164}, "4": {"Male": 186, "Female": 162}, "5": {"Male": 155, "Female": 154}, "6": {"Male": 157, "Female": 149}, "7": {"Male": 167, "Female": 154}, "8": {"Male": 158, "Female": 158}, "9": {"Male": 161, "Female": 155}, "10": {"Male": 158, "Female": 153}, "11": {"Male": 166, "Female": 165}, "12": {"Male": 163, "Female": 163}, "13": {"Male": 175, "Female": 160}, "14": {"Male": 165, "Female": 160}}, "Dearne North": {"5": {"Male": 83, "Female": 83}, "6": {"Male": 84, "Female": 80}, "7": {"Male": 90, "Female": 83}, "8": {"Male": 85, "Female": 85}, "9": {"Male": 86, "Female": 83}, "10": {"Male": 80, "Female": 78}, "15": {"Male": 85, "Female": 79}, "16": {"Male": 85, "Female": 78}, "17": {"Male": 83, "Female": 76}, "11": {"Male": 84, "Female": 84}, "12": {"Male": 83, "Female": 83}, "13": {"Male": 89, "Female": 81}, "14": {"Male": 84, "Female": 82}, "0": {"Male": 82, "Female": 82}, "1": {"Male": 88, "Female": 82}, "2": {"Male": 92, "Female": 87}, "3": {"Male": 88, "Female": 91}, "4": {"Male": 103, "Female": 89}}, "Monk Bretton": {"5": {"Male": 74, "Female": 74}, "6": {"Male": 75, "Female": 71}, "7": {"Male": 80, "Female": 74}, "8": {"Male": 76, "Female": 75}, "9": {"Male": 77, "Female": 74}, "15": {"Male": 75, "Female": 71}, "16": {"Male": 75, "Female": 70}, "17": {"Male": 74, "Female": 67}, "0": {"Male": 63, "Female": 63}, "1": {"Male": 68, "Female": 63}, "2": {"Male": 71, "Female": 67}, "3": {"Male": 67, "Female": 70}, "4": {"Male": 79, "Female": 69}, "10": {"Male": 74, "Female": 72}, "11": {"Male": 77, "Female": 77}, "12": {"Male": 76, "Female": 76}, "13": {"Male": 82, "Female": 74}, "14": {"Male": 77, "Female": 75}}, "St Helens": {"5": {"Male": 81, "Female": 80}, "6": {"Male": 81, "Female": 78}, "7": {"Male": 87, "Female": 80}, "8": {"Male": 82, "Female": 82}, "9": {"Male": 84, "Female": 81}, "15": {"Male": 81, "Female": 76}, "16": {"Male": 81, "Female": 75}, "17": {"Male": 80, "Female": 72}, "0": {"Male": 68, "Female": 68}, "1": {"Male": 73, "Female": 68}, "2": {"Male": 76, "Female": 72}, "3": {"Male": 73, "Female": 75}, "4": {"Male": 85, "Female": 74}, "10": {"Male": 80, "Female": 77}, "11": {"Male": 84, "Female": 83}, "12": {"Male": 82, "Female": 82}, "13": {"Male": 88, "Female": 80}, "14": {"Male": 83, "Female": 81}}, "Penistone East": {"5": {"Male": 61, "Female": 60}, "6": {"Male": 61, "Female": 58}, "7": {"Male": 65, "Female": 60}, "8": {"Male": 62, "Female": 62}, "9": {"Male": 63, "Female": 61}, "10": {"Male": 75, "Female": 73}, "11": {"Male": 79, "Female": 78}, "12": {"Male": 77, "Female": 78}, "13": {"Male": 83, "Female": 76}, "14": {"Male": 79, "Female": 76}, "15": {"Male": 77, "Female": 72}, "16": {"Male": 77, "Female": 71}, "17": {"Male": 76, "Female": 69}, "0": {"Male": 44, "Female": 45}, "1": {"Male": 48, "Female": 45}, "2": {"Male": 50, "Female": 47}, "3": {"Male": 48, "Female": 49}, "4": {"Male": 56, "Female": 49}}, "Stairfoot": {"5": {"Male": 90, "Female": 89}, "6": {"Male": 91, "Female": 86}, "7": {"Male": 97, "Female": 89}, "8": {"Male": 91, "Female": 91}, "9": {"Male": 93, "Female": 90}, "10": {"Male": 82, "Female": 79}, "11": {"Male": 86, "Female": 85}, "12": {"Male": 84, "Female": 84}, "13": {"Male": 90, "Female": 82}, "14": {"Male": 85, "Female": 83}, "0": {"Male": 69, "Female": 69}, "1": {"Male": 74, "Female": 69}, "2": {"Male": 78, "Female": 73}, "3": {"Male": 74, "Female": 76}, "4": {"Male": 86, "Female": 75}, "15": {"Male": 80, "Female": 75}, "16": {"Male": 80, "Female": 74}, "17": {"Male": 79, "Female": 72}}, "Dearne South": {"5": {"Male": 72, "Female": 71}, "6": {"Male": 73, "Female": 69}, "15": {"Male": 70, "Female": 66}, "16": {"Male": 70, "Female": 65}, "17": {"Male": 69, "Female": 63}, "7": {"Male": 77, "Female": 71}, "8": {"Male": 73, "Female": 73}, "9": {"Male": 75, "Female": 72}, "10": {"Male": 78, "Female": 75}, "11": {"Male": 81, "Female": 81}, "12": {"Male": 80, "Female": 80}, "13": {"Male": 86, "Female": 78}, "14": {"Male": 81, "Female": 79}, "0": {"Male": 66, "Female": 67}, "1": {"Male": 72, "Female": 67}, "2": {"Male": 75, "Female": 70}, "3": {"Male": 71, "Female": 74}, "4": {"Male": 83, "Female": 73}}, "Hoyland Milton": {"10": {"Male": 66, "Female": 64}, "11": {"Male": 69, "Female": 69}, "12": {"Male": 68, "Female": 68}, "13": {"Male": 73, "Female": 67}, "14": {"Male": 69, "Female": 67}, "15": {"Male": 66, "Female": 62}, "16": {"Male": 66, "Female": 61}, "17": {"Male": 65, "Female": 59}, "0": {"Male": 55, "Female": 56}, "1": {"Male": 60, "Female": 56}, "2": {"Male": 63, "Female": 59}, "3": {"Male": 59, "Female": 61}, "4": {"Male": 70, "Female": 61}, "5": {"Male": 64, "Female": 63}, "6": {"Male": 65, "Female": 61}, "7": {"Male": 69, "Female": 64}, "8": {"Male": 65, "Female": 65}, "9": {"Male": 66, "Female": 64}}, "Worsbrough": {"10": {"Male": 55, "Female": 54}, "11": {"Male": 58, "Female": 58}, "12": {"Male": 57, "Female": 57}, "13": {"Male": 61, "Female": 56}, "14": {"Male": 58, "Female": 56}, "15": {"Male": 62, "Female": 58}, "16": {"Male": 62, "Female": 57}, "17": {"Male": 61, "Female": 55}, "5": {"Male": 56, "Female": 56}, "6": {"Male": 57, "Female": 54}, "7": {"Male": 60, "Female": 56}, "8": {"Male": 57, "Female": 57}, "9": {"Male": 58, "Female": 56}, "0": {"Male": 43, "Female": 44}, "1": {"Male": 47, "Female": 44}, "2": {"Male": 49, "Female": 46}, "3": {"Male": 47, "Female": 48}, "4": {"Male": 55, "Female": 48}}, "Old Town": {"10": {"Male": 63, "Female": 61}, "11": {"Male": 66, "Female": 66}, "12": {"Male": 65, "Female": 66}, "13": {"Male": 70, "Female": 64}, "14": {"Male": 66, "Female": 64}, "15": {"Male": 71, "Female": 66}, "16": {"Male": 71, "Female": 65}, "17": {"Male": 70, "Female": 63}, "0": {"Male": 53, "Female": 54}, "1": {"Male": 58, "Female": 54}, "2": {"Male": 60, "Female": 57}, "3": {"Male": 57, "Female": 59}, "4": {"Male": 67, "Female": 58}, "5": {"Male": 61, "Female": 61}, "6": {"Male": 62, "Female": 59}, "7": {"Male": 66, "Female": 61}, "8": {"Male": 63, "Female": 62}, "9": {"Male": 64, "Female": 61}}, "Dodworth": {"10": {"Male": 62, "Female": 60}, "11": {"Male": 65, "Female": 65}, "12": {"Male": 64, "Female": 64}, "13": {"Male": 69, "Female": 63}, "14": {"Male": 65, "Female": 63}, "15": {"Male": 66, "Female": 62}, "16": {"Male": 66, "Female": 61}, "17": {"Male": 65, "Female": 59}, "0": {"Male": 41, "Female": 41}, "1": {"Male": 44, "Female": 41}, "2": {"Male": 46, "Female": 44}, "5": {"Male": 54, "Female": 54}, "6": {"Male": 55, "Female": 52}, "7": {"Male": 59, "Female": 54}, "8": {"Male": 56, "Female": 55}, "9": {"Male": 57, "Female": 54}, "3": {"Male": 44, "Female": 46}, "4": {"Male": 52, "Female": 45}}, "Kingstone": {"10": {"Male": 64, "Female": 62}, "11": {"Male": 67, "Female": 66}, "12": {"Male": 66, "Female": 66}, "13": {"Male": 71, "Female": 64}, "14": {"Male": 66, "Female": 64}, "5": {"Male": 58, "Female": 57}, "6": {"Male": 58, "Female": 56}, "7": {"Male": 62, "Female": 57}, "8": {"Male": 59, "Female": 59}, "9": {"Male": 60, "Female": 58}, "15": {"Male": 61, "Female": 58}, "16": {"Male": 61, "Female": 57}, "17": {"Male": 60, "Female": 55}, "0": {"Male": 56, "Female": 57}, "1": {"Male": 61, "Female": 57}, "2": {"Male": 64, "Female": 60}, "3": {"Male": 60, "Female": 62}, "4": {"Male": 71, "Female": 62}}, "Rockingham": {"15": {"Male": 75, "Female": 70}, "16": {"Male": 75, "Female": 69}, "17": {"Male": 73, "Female": 66}, "10": {"Male": 66, "Female": 64}, "11": {"Male": 69, "Female": 69}, "12": {"Male": 68, "Female": 68}, "13": {"Male": 73, "Female": 67}, "14": {"Male": 69, "Female": 67}, "5": {"Male": 64, "Female": 63}, "6": {"Male": 65, "Female": 62}, "7": {"Male": 69, "Female": 64}, "8": {"Male": 65, "Female": 65}, "9": {"Male": 66, "Female": 64}, "0": {"Male": 53, "Female": 54}, "1": {"Male": 58, "Female": 54}, "2": {"Male": 60, "Female": 57}, "3": {"Male": 57, "Female": 59}, "4": {"Male": 67, "Female": 58}}, "Darton East": {"15": {"Male": 68, "Female": 63}, "16": {"Male": 68, "Female": 63}, "17": {"Male": 67, "Female": 60}, "5": {"Male": 58, "Female": 58}, "6": {"Male": 59, "Female": 56}, "7": {"Male": 63, "Female": 58}, "8": {"Male": 60, "Female": 59}, "9": {"Male": 61, "Female": 58}, "10": {"Male": 63, "Female": 62}, "11": {"Male": 67, "Female": 66}, "12": {"Male": 65, "Female": 66}, "13": {"Male": 70, "Female": 64}, "14": {"Male": 66, "Female": 64}, "0": {"Male": 54, "Female": 54}, "1": {"Male": 58, "Female": 54}, "2": {"Male": 61, "Female": 57}, "3": {"Male": 58, "Female": 60}, "4": {"Male": 68, "Female": 59}}, "Darton West": {"0": {"Male": 45, "Female": 45}, "1": {"Male": 48, "Female": 45}, "2": {"Male": 50, "Female": 47}, "3": {"Male": 48, "Female": 49}, "4": {"Male": 56, "Female": 49}, "10": {"Male": 56, "Female": 54}, "11": {"Male": 58, "Female": 58}, "12": {"Male": 57, "Female": 58}, "13": {"Male": 62, "Female": 56}, "14": {"Male": 58, "Female": 56}, "5": {"Male": 51, "Female": 50}, "6": {"Male": 51, "Female": 49}, "7": {"Male": 55, "Female": 51}, "8": {"Male": 52, "Female": 52}, "9": {"Male": 53, "Female": 51}, "15": {"Male": 56, "Female": 53}, "16": {"Male": 56, "Female": 52}, "17": {"Male": 55, "Female": 50}}, "Darfield": {"5": {"Male": 66, "Female": 65}, "6": {"Male": 67, "Female": 63}, "7": {"Male": 71, "Female": 66}, "8": {"Male": 67, "Female": 67}, "9": {"Male": 68, "Female": 66}, "10": {"Male": 67, "Female": 65}, "11": {"Male": 70, "Female": 70}, "12": {"Male": 69, "Female": 69}, "13": {"Male": 74, "Female": 68}, "14": {"Male": 70, "Female": 68}, "15": {"Male": 65, "Female": 60}, "16": {"Male": 65, "Female": 60}, "17": {"Male": 63, "Female": 58}, "0": {"Male": 57, "Female": 57}, "1": {"Male": 61, "Female": 57}, "2": {"Male": 64, "Female": 60}, "3": {"Male": 61, "Female": 63}, "4": {"Male": 71, "Female": 62}}, "Penistone West": {"10": {"Male": 85, "Female": 83}, "11": {"Male": 90, "Female": 89}, "12": {"Male": 88, "Female": 88}, "13": {"Male": 95, "Female": 86}, "14": {"Male": 89, "Female": 87}, "5": {"Male": 80, "Female": 79}, "6": {"Male": 80, "Female": 77}, "15": {"Male": 76, "Female": 71}, "16": {"Male": 76, "Female": 70}, "17": {"Male": 75, "Female": 68}, "7": {"Male": 86, "Female": 79}, "8": {"Male": 81, "Female": 81}, "9": {"Male": 83, "Female": 80}, "0": {"Male": 57, "Female": 58}, "1": {"Male": 62, "Female": 58}, "2": {"Male": 65, "Female": 61}, "3": {"Male": 61, "Female": 64}, "4": {"Male": 72, "Female": 63}}, "Wombwell": {"10": {"Male": 70, "Female": 68}, "11": {"Male": 74, "Female": 73}, "12": {"Male": 72, "Female": 73}, "13": {"Male": 78, "Female": 71}, "0": {"Male": 69, "Female": 70}, "1": {"Male": 75, "Female": 70}, "2": {"Male": 78, "Female": 73}, "3": {"Male": 74, "Female": 77}, "4": {"Male": 87, "Female": 76}, "14": {"Male": 73, "Female": 71}, "5": {"Male": 71, "Female": 70}, "6": {"Male": 72, "Female": 68}, "7": {"Male": 76, "Female": 71}, "8": {"Male": 72, "Female": 72}, "9": {"Male": 74, "Female": 71}, "15": {"Male": 74, "Female": 70}, "16": {"Male": 74, "Female": 69}, "17": {"Male": 73, "Female": 66}}, "Cudworth": {"0": {"Male": 66, "Female": 66}, "1": {"Male": 71, "Female": 66}, "2": {"Male": 74, "Female": 70}, "3": {"Male": 70, "Female": 73}, "4": {"Male": 82, "Female": 72}, "10": {"Male": 76, "Female": 74}, "11": {"Male": 80, "Female": 80}, "12": {"Male": 79, "Female": 79}, "13": {"Male": 85, "Female": 77}, "14": {"Male": 80, "Female": 78}, "5": {"Male": 76, "Female": 75}, "6": {"Male": 77, "Female": 73}, "7": {"Male": 82, "Female": 75}, "8": {"Male": 77, "Female": 77}, "9": {"Male": 79, "Female": 76}, "15": {"Male": 77, "Female": 72}, "16": {"Male": 77, "Female": 71}, "17": {"Male": 76, "Female": 69}}, "Royston": {"10": {"Male": 72, "Female": 70}, "11": {"Male": 76, "Female": 75}, "12": {"Male": 74, "Female": 75}, "13": {"Male": 80, "Female": 73}, "14": {"Male": 75, "Female": 73}, "5": {"Male": 71, "Female": 70}, "6": {"Male": 71, "Female": 68}, "7": {"Male": 76, "Female": 70}, "8": {"Male": 72, "Female": 72}, "9": {"Male": 73, "Female": 71}, "15": {"Male": 77, "Female": 72}, "16": {"Male": 77, "Female": 71}, "17": {"Male": 75, "Female": 68}, "0": {"Male": 58, "Female": 59}, "1": {"Male": 63, "Female": 58}, "2": {"Male": 66, "Female": 62}, "3": {"Male": 62, "Female": 65}, "4": {"Male": 73, "Female": 64}}, "Barnsley": {"0": {"Male": 1236, "Female": 1246}, "1": {"Male": 1335, "Female": 1244}, "2": {"Male": 1396, "Female": 1313}, "3": {"Male": 1327, "Female": 1373}, "4": {"Male": 1553, "Female": 1353}, "5": {"Male": 1437, "Female": 1427}, "6": {"Male": 1454, "Female": 1384}, "7": {"Male": 1549, "Female": 1430}, "8": {"Male": 1466, "Female": 1461}, "9": {"Male": 1494, "Female": 1437}, "10": {"Male": 1476, "Female": 1431}, "11": {"Male": 1548, "Female": 1537}, "12": {"Male": 1523, "Female": 1526}, "13": {"Male": 1637, "Female": 1490}, "14": {"Male": 1543, "Female": 1497}, "15": {"Male": 1513, "Female": 1418}, "16": {"Male": 1513, "Female": 1397}, "17": {"Male": 1486, "Female": 1349}}};
+
+// ── Read URL params ───────────────────────────────────────────────────────────
+const _params  = new URLSearchParams(window.location.search);
+const SEL_NAME = decodeURIComponent((_params.get("name") || "Barnsley").replace(/\+/g, " "));
+const SEL_TYPE = decodeURIComponent((_params.get("type") || "Local Authority").replace(/\+/g, " "));
+
+// Resolve which dataset to show
+function resolveData() {
+  if (ALL_DATA[SEL_NAME]) return { name: SEL_NAME, rows: ALL_DATA[SEL_NAME] };
+  // Fallback to Barnsley
+  return { name: "Barnsley", rows: ALL_DATA["Barnsley"] || {} };
+}
+
+// ── Build pyramid ─────────────────────────────────────────────────────────────
+function buildPyramid() {
+  const { name, rows } = resolveData();
+
+  // Subtitle
+  const typeLabel = SEL_TYPE === "Local Authority" ? "Borough"
+                  : SEL_TYPE === "Area Council"    ? "Area Council"
+                  : SEL_TYPE === "Ward"            ? "Ward"
+                  : "";
+  document.getElementById("geo-subtitle").textContent =
+    name === "Barnsley" ? "Barnsley Borough · all 6 Area Councils"
+    : typeLabel ? name + " " + typeLabel : name;
+
+  // Gather all 18 ages 0–17
+  const ages = Array.from({length: 18}, (_, i) => i);
+
+  // Compute per-age male/female
+  const maleCounts   = ages.map(a => (rows[a] || {})["Male"]   || 0);
+  const femaleCounts = ages.map(a => (rows[a] || {})["Female"] || 0);
+
+  const totalMale   = maleCounts.reduce((s, v) => s + v, 0);
+  const totalFemale = femaleCounts.reduce((s, v) => s + v, 0);
+
+  document.getElementById("total-male").textContent   = totalMale.toLocaleString();
+  document.getElementById("total-female").textContent = totalFemale.toLocaleString();
+
+  // Max value across all ages and genders for this geography → scale
+  const maxVal = Math.max(...maleCounts, ...femaleCounts, 1);
+
+  const pyramid = document.getElementById("pyramid");
+  pyramid.innerHTML = "";
+
+  ages.forEach((age, i) => {
+    const m = maleCounts[i];
+    const f = femaleCounts[i];
+
+    // Bar widths as % of the 45% cell width (so 100% = fills the cell)
+    // Bars are capped at 100% of their cell
+    const mPct = Math.round(m / maxVal * 100);
+    const fPct = Math.round(f / maxVal * 100);
+
+    // Decide label placement (inside if bar >= 15% of max, outside otherwise)
+    const mInside = mPct >= 15;
+    const fInside = fPct >= 15;
+
+    const row = document.createElement("div");
+    row.className = "age-row";
+
+    // Male cell
+    const mCell = document.createElement("div");
+    mCell.className = "male-cell";
+    const mBar = document.createElement("div");
+    mBar.className = "male-bar";
+    mBar.style.width = "0%";
+    mBar.style.transitionDelay = (i * 35) + "ms";
+
+    const mLbl = document.createElement("span");
+    mLbl.className = "male-bar-lbl" + (mInside ? "" : " outside");
+    mLbl.textContent = m.toLocaleString();
+    mBar.appendChild(mLbl);
+    mCell.appendChild(mBar);
+
+    // Age label cell
+    const ageLblCell = document.createElement("div");
+    ageLblCell.className = "age-lbl-cell";
+    ageLblCell.textContent = age;
+
+    // Female cell
+    const fCell = document.createElement("div");
+    fCell.className = "female-cell";
+    const fBar = document.createElement("div");
+    fBar.className = "female-bar";
+    fBar.style.width = "0%";
+    fBar.style.transitionDelay = (i * 35) + "ms";
+
+    const fLbl = document.createElement("span");
+    fLbl.className = "female-bar-lbl" + (fInside ? "" : " outside");
+    fLbl.textContent = f.toLocaleString();
+    fBar.appendChild(fLbl);
+    fCell.appendChild(fBar);
+
+    row.appendChild(mCell);
+    row.appendChild(ageLblCell);
+    row.appendChild(fCell);
+    pyramid.appendChild(row);
+
+    // Animate to target width on next frame
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        mBar.style.width = mPct + "%";
+        fBar.style.width = fPct + "%";
+      });
+    });
+  });
+}
+
+buildPyramid();
+</script>
+</body>
+</html>
