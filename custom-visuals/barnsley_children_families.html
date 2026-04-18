@@ -297,7 +297,7 @@ function featureStyle(feat) {
 }
 
 // ── Map init ──────────────────────────────────────────────────────────────────
-const map = L.map("map", {zoomControl: true}).setView([53.548, -1.47], 10);
+const map = L.map("map", {zoomControl: true});
 
 function setTile(key) {
   if (tileLayer) map.removeLayer(tileLayer);
@@ -426,6 +426,7 @@ function makeLayer(data) {
 
 let acLayer   = makeLayer(AC_DATA).addTo(map);
 let wardLayer = makeLayer(WARD_DATA);
+map.fitBounds(acLayer.getBounds(), {padding: [18, 18]});
 
 // ── Family Hub markers ────────────────────────────────────────────────────────
 const hubIcon = L.divIcon({
