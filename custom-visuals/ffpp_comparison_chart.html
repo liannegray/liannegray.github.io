@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<!--
+  ffpp_comparison_chart.html
+  ==========================
+  FFPP Locality Profiles — Comparison Bar Chart
+  Reusable across all domains (IFD, CIN, CPP, CIC, etc.)
+  All data arrives via URL parameters — no rebuild needed when switching domains.
+
+  URL PARAMETERS
+  ──────────────
+  loc   = Selected locality name          e.g. Central+Barnsley
+  val1  = Selected locality rate          e.g. 100.0
+  ref   = Middle row label               e.g. Barnsley+Average  OR  England+Average
+  val2  = Middle row rate                 e.g. 85.0
+  high  = Highest AC name                e.g. North  (shown as "Highest: North")
+  val3  = Highest AC rate                 e.g. 115.0
+  unit  = Unit label                      e.g. per+10%2C000+children
+  dp    = Decimal places (default 1)      e.g. 0  or  2
+  max   = Bar scale ceiling (optional)    e.g. 130  — auto-calculated if omitted
+  alert = % above ref to trigger badge    e.g. 20  (default 20, set 0 to disable)
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FFPP Comparison Chart</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  width: 100%; height: 100%;
+  overflow: hidden;
+  background: #ffffff;
+  font-family: 'Segoe UI', sans-serif;
+  color: #1e1e2e;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Three comparator rows ─────────────────────────────────── */
+#chart {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  padding: 10px 16px 6px;
+  gap: 0;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 34% 54% 12%;
+  align-items: center;
+  flex: 1;
+  min-height: 0;
+  max-height: 72px;
+  position: relative;
+}
+
+/* Left accent stripe for Row 1 (selected locality) */
+.row.selected {
+  border-left: 3px solid #0061AD;
+  padding-left: 8px;
+  margin-left: -3px;
+}
+
+/* ── Label area ───────────────────────────────────────────── */
+.row-label {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding-right: 10px;
+  min-width: 0;
+}
+.label-main {
+  font-family: 'Segoe UI Semibold', 'Segoe UI', sans-serif;
+  font-weight: 600;
+  font-size: 11px;
+  color: #1e1e2e;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.row.selected .label-main {
+  color: #0061AD;
+}
+.label-sub {
+  font-size: 10px;
+  color: #64748b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Alert badge */
+.alert-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 9px;
+  font-family: 'Segoe UI Semibold', 'Segoe UI', sans-serif;
+  font-weight: 600;
+  color: #b45309;
+  background: #fef3c7;
+  border: 1px solid #fcd34d;
+  border-radius: 3px;
+  padding: 1px 4px;
+  margin-top: 3px;
+  width: fit-content;
+}
+
+/* ── Bar track ────────────────────────────────────────────── */
+.bar-track {
+  height: 50%;
+  min-height: 18px;
+  max-height: 34px;
+  background: #f1f5f9;
+  border-radius: 3px;
+  overflow: visible;
+  position: relative;
+}
+
+.bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  width: 0%;
+  transition: width 0.65s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+/* Row 1 — blue (selected) */
+.bar-fill.fill-selected {
+  background: rgba(0, 97, 173, 0.82);
+}
+/* Row 2 — slate (average reference) */
+.bar-fill.fill-avg {
+  background: rgba(100, 116, 139, 0.65);
+}
+/* Row 3 — purple (highest) */
+.bar-fill.fill-highest {
+  background: rgba(79, 31, 106, 0.80);
+}
+
+/* Value label inside/outside bar */
+.bar-val-label {
+  font-family: 'Segoe UI Semibold', 'Segoe UI', sans-serif;
+  font-weight: 600;
+  font-size: 10px;
+  color: #ffffff;
+  white-space: nowrap;
+  padding-left: 5px;
+  pointer-events: none;
+}
+.bar-val-label.outside {
+  color: #374151;
+  padding-left: 0;
+  margin-left: 5px;
+  position: absolute;
+  left: 100%;
+}
+
+/* ── Rate value (right column) ───────────────────────────── */
+.row-value {
+  text-align: right;
+  padding-left: 6px;
+}
+.value-number {
+  font-family: 'Segoe UI Semibold', 'Segoe UI', sans-serif;
+  font-weight: 600;
+  font-size: 12px;
+  color: #1e1e2e;
+  white-space: nowrap;
+}
+.row.selected .value-number { color: #0061AD; }
+.row.highest  .value-number { color: #4F1F6A; }
+
+/* Divider between rows */
+.row-divider {
+  height: 1px;
+  background: #f1f5f9;
+  margin: 0 0;
+  flex-shrink: 0;
+}
+
+/* ── Footer ──────────────────────────────────────────────── */
+#footer {
+  flex-shrink: 0;
+  padding: 5px 16px 7px;
+  border-top: 1px solid #f1f5f9;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10px;
+  color: #64748b;
+}
+.legend-swatch {
+  width: 20px;
+  height: 8px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.unit-note {
+  margin-left: auto;
+  font-size: 10px;
+  color: #94a3b8;
+  font-style: italic;
+}
+</style>
+</head>
+<body>
+
+<div id="chart"></div>
+
+<div id="footer">
+  <div class="legend-item">
+    <div class="legend-swatch" style="background:rgba(0,97,173,0.82)"></div>
+    <span id="legend-loc">Selected locality</span>
+  </div>
+  <div class="legend-item">
+    <div class="legend-swatch" style="background:rgba(100,116,139,0.65)"></div>
+    <span id="legend-ref">Barnsley Average</span>
+  </div>
+  <div class="legend-item">
+    <div class="legend-swatch" style="background:rgba(79,31,106,0.80)"></div>
+    <span>Highest Area Council</span>
+  </div>
+  <div class="unit-note" id="unit-note"></div>
+</div>
+
+<script>
+// ── Parse URL params ────────────────────────────────────────────────────────
+const p = new URLSearchParams(window.location.search);
+const decode = key => decodeURIComponent((p.get(key) || "").replace(/\+/g, " ")).trim();
+
+const LOC   = decode("loc")   || "Selected Locality";
+const VAL1  = parseFloat(p.get("val1")) || 0;
+const REF   = decode("ref")   || "Barnsley Average";
+const VAL2  = parseFloat(p.get("val2")) || 0;
+const HIGH  = decode("high")  || "—";
+const VAL3  = parseFloat(p.get("val3")) || 0;
+const UNIT  = decode("unit")  || "per 10,000 children";
+const DP    = parseInt(p.get("dp") ?? "1", 10);
+const ALERT = p.has("alert") ? parseFloat(p.get("alert")) : 20;
+
+// Bar scale: use ?max= if provided, else auto from highest value + 15% headroom
+const rawMax = Math.max(VAL1, VAL2, VAL3, 0.001);
+const MAX    = p.has("max") && parseFloat(p.get("max")) > 0
+               ? parseFloat(p.get("max"))
+               : Math.ceil(rawMax * 1.18 / 5) * 5;
+
+// Alert: show if Row 1 is ALERT% above Row 2
+const abovePct = VAL2 > 0 ? ((VAL1 - VAL2) / VAL2) * 100 : 0;
+const showAlert = ALERT > 0 && abovePct >= ALERT;
+
+const fmt = v => Number.isFinite(v) ? v.toFixed(DP) : "—";
+
+// ── Update footer legends ───────────────────────────────────────────────────
+document.getElementById("legend-loc").textContent = LOC;
+document.getElementById("legend-ref").textContent = REF;
+document.getElementById("unit-note").textContent  = UNIT;
+
+// ── Build rows ──────────────────────────────────────────────────────────────
+const rows = [
+  {
+    cssClass:  "selected",
+    fillClass: "fill-selected",
+    labelMain: LOC,
+    labelSub:  null,
+    value:     VAL1,
+    showAlert: showAlert,
+    alertText: showAlert ? ("+" + abovePct.toFixed(0) + "% above " + REF) : null,
+  },
+  {
+    cssClass:  "avg",
+    fillClass: "fill-avg",
+    labelMain: REF,
+    labelSub:  null,
+    value:     VAL2,
+    showAlert: false,
+  },
+  {
+    cssClass:  "highest",
+    fillClass: "fill-highest",
+    labelMain: "Highest Area Council",
+    labelSub:  HIGH !== "—" ? HIGH : null,
+    value:     VAL3,
+    showAlert: false,
+  },
+];
+
+const chart = document.getElementById("chart");
+
+rows.forEach((row, i) => {
+  // Row div
+  const rowEl = document.createElement("div");
+  rowEl.className = "row " + row.cssClass;
+
+  // ── Label ──
+  const labelDiv = document.createElement("div");
+  labelDiv.className = "row-label";
+
+  const mainSpan = document.createElement("div");
+  mainSpan.className = "label-main";
+  mainSpan.textContent = row.labelMain;
+  labelDiv.appendChild(mainSpan);
+
+  if (row.labelSub) {
+    const subSpan = document.createElement("div");
+    subSpan.className = "label-sub";
+    subSpan.textContent = row.labelSub;
+    labelDiv.appendChild(subSpan);
+  }
+
+  if (row.showAlert) {
+    const badge = document.createElement("div");
+    badge.className = "alert-badge";
+    badge.textContent = "⚠ " + row.alertText;
+    labelDiv.appendChild(badge);
+  }
+
+  // ── Bar ──
+  const trackDiv = document.createElement("div");
+  trackDiv.className = "bar-track";
+
+  const fillDiv = document.createElement("div");
+  fillDiv.className = "bar-fill " + row.fillClass;
+  fillDiv.style.width = "0%";
+
+  const targetPct = MAX > 0 ? Math.min((row.value / MAX) * 100, 100) : 0;
+  fillDiv.dataset.target = targetPct;
+
+  // Value label inside vs outside bar
+  const inside = targetPct >= 18;
+  const valLbl = document.createElement("span");
+  valLbl.className = "bar-val-label" + (inside ? "" : " outside");
+  valLbl.textContent = fmt(row.value);
+  fillDiv.appendChild(valLbl);
+
+  trackDiv.appendChild(fillDiv);
+
+  // ── Rate (right column) ──
+  const valueDiv = document.createElement("div");
+  valueDiv.className = "row-value";
+  const numSpan = document.createElement("div");
+  numSpan.className = "value-number";
+  numSpan.textContent = fmt(row.value);
+  valueDiv.appendChild(numSpan);
+
+  rowEl.appendChild(labelDiv);
+  rowEl.appendChild(trackDiv);
+  rowEl.appendChild(valueDiv);
+  chart.appendChild(rowEl);
+
+  // Divider between rows (not after last)
+  if (i < rows.length - 1) {
+    const div = document.createElement("div");
+    div.className = "row-divider";
+    chart.appendChild(div);
+  }
+});
+
+// ── Animate bars in ─────────────────────────────────────────────────────────
+requestAnimationFrame(() => {
+  requestAnimationFrame(() => {
+    document.querySelectorAll(".bar-fill").forEach((bar, i) => {
+      bar.style.transitionDelay = (i * 120) + "ms";
+      bar.style.width = bar.dataset.target + "%";
+    });
+  });
+});
+</script>
+</body>
+</html>
