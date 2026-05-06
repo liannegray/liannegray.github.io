@@ -145,7 +145,7 @@ function addLabel(latlng, text, fontSize, color) {
         transform: translate(-50%,-50%);
         white-space: nowrap;
         font-size: ${fs}px;
-        font-weight: 800;
+        font-weight: 600;
         color: ${col};
         font-family: 'Segoe UI', Arial, sans-serif;
         letter-spacing: 0.4px;
@@ -226,10 +226,10 @@ function showBarnsley() {
   // Area council name labels
   AC_DATA.features.forEach(f => {
     const ac = f.properties.area_council_name;
-    addLabel(getCenter(f), ac.toUpperCase(), 15, AC_COLORS[ac] || '#222');
+    addLabel(getCenter(f), ac.toUpperCase(), 13, AC_COLORS[ac] || '#222');
   });
 
-  map.fitBounds(outline.getBounds(), { padding: [22, 22], animate: true });
+  map.fitBounds(outline.getBounds(), { padding: [8, 8], animate: true });
   updateButtons('barnsley');
 }
 
@@ -272,10 +272,10 @@ function showAC(ac) {
 
   // Ward name labels — only text on screen (no competing base map labels)
   thisWards.forEach(f => {
-    addLabel(getCenter(f), f.properties.ward_name, 13, '#1a1a2e');
+    addLabel(getCenter(f), f.properties.ward_name, 11, '#1a1a2e');
   });
 
-  map.fitBounds(acLayer.getBounds(), { padding: [55, 55], animate: true });
+  map.fitBounds(acLayer.getBounds(), { padding: [12, 12], animate: true });
   updateButtons(ac);
 }
 
