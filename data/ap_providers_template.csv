@@ -1,0 +1,4 @@
+provider_name,postcode,address,provider_type,ofsted_registered,ofsted_rating,in_barnsley,is_online,pupils_in_ap,avg_duration_value,avg_duration_unit,notes
+Example AP Provider,S70 2TA,"PO Box 634, Barnsley",Registered school,Yes,Good,Yes,No,12,2,terms,"any free-text notes for the popup"
+Example Online Tuition,,,Online tuition,No,Not applicable,No,Yes,5,1,terms,"remote / no fixed site"
+Example Out-of-Area Unregistered,S60 1AA,"Rotherham",Unregistered provision,No,Not applicable,No,No,3,3,terms,"highest-risk group"
