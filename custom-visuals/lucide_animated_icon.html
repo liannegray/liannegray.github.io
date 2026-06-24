@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<!--
+  lucide_animated_icon.html
+  =========================
+  Animated Lucide-style icons for Power BI HTML visuals.
+
+  Re-implements the effects from https://lucide-animated.com using nothing but
+  inline SVG + CSS keyframe animation. No React, no Framer Motion, no Babel —
+  the whole file is ~5 KB and matches the same hosted-file + URL-param pattern
+  as the other visuals in this folder. The DAX measure only builds an <iframe>
+  URL; the HTML never sits in the measure.
+
+  WHY NOT REACT?  Every lucide-animated effect maps to a CSS primitive:
+    pathLength 0->1  ->  stroke-dashoffset (line draw)
+    translateX/Y     ->  transform: translate (bounce)
+    rotate           ->  transform: rotate (spin / swing)
+    opacity          ->  opacity
+  Framer Motion is just a JS engine for those four things, so we skip it.
+
+  URL PARAMETERS
+  ──────────────
+  icon    = Icon name                      e.g. trending-up | refresh-cw | bell
+  size    = Icon size in px (default 96)   e.g. 120
+  color   = Stroke colour, hex WITHOUT #   e.g. color=1e1e2e  (or a named colour)
+  stroke  = Stroke width (default 2)       e.g. 2.5
+  trigger = loop | load | hover            e.g. trigger=hover   (default loop)
+  dur     = Speed multiplier (default 1)   e.g. 1.5 = slower, 0.7 = faster
+  gap     = Loop pause in ms (default 1600)e.g. 800
+  bg      = Background colour, hex no #     e.g. bg=ffffff       (default transparent)
+
+  ADDING AN ICON
+  ──────────────
+  Drop a new entry in the ICONS map below. `anim` is the whole-svg movement
+  (bounce | spin | swing | none); mark any stroke you want "drawn" with class
+  "draw" (add "delay" to stagger it). Grab raw paths from lucide.dev.
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Animated Lucide Icon</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    width: 100%; height: 100%;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg, transparent);
+    font-family: 'Segoe UI', sans-serif;
+  }
+
+  /* Stroked icon parts inherit colour + weight from CSS variables */
+  .s {
+    fill: none;
+    stroke: var(--c, #1e1e2e);
+    stroke-width: var(--sw, 2);
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  /* Idle (not playing) state: fully drawn + visible, so the icon is never blank */
+  .draw { stroke-dasharray: 1; stroke-dashoffset: 0; opacity: 1; }
+
+  /* ── Animations only run while the wrapper has .play ──────────────────────── */
+  .icon.play .draw {
+    animation: draw calc(0.4s * var(--k, 1)) ease forwards;
+  }
+  .icon.play .draw.delay {
+    animation-delay:    calc(0.3s * var(--k, 1));
+    animation-duration: calc(0.3s * var(--k, 1));
+  }
+
+  .icon.play .anim-bounce { animation: bounce calc(0.5s * var(--k, 1)) ease; }
+  .icon.play .anim-spin   { animation: spin   calc(0.8s * var(--k, 1)) ease-in-out; }
+  .icon.play .anim-swing  { animation: swing  calc(0.7s * var(--k, 1)) ease-in-out; }
+  .icon.play .anim-pulse  { animation: pulse  calc(0.6s * var(--k, 1)) ease-in-out; }
+
+  .anim-spin  { transform-origin: 50% 50%; }
+  .anim-swing { transform-origin: 50% 12%; }
+  .anim-pulse { transform-origin: 50% 50%; }
+
+  /* ── Keyframes ────────────────────────────────────────────────────────────── */
+  @keyframes draw {
+    0%   { stroke-dashoffset: 1; opacity: 0; }
+    15%  { opacity: 1; }
+    100% { stroke-dashoffset: 0; opacity: 1; }
+  }
+  @keyframes bounce {
+    0%, 100% { transform: translate(0, 0); }
+    50%      { transform: translate(8%, -8%); }
+  }
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+  }
+  @keyframes swing {
+    0%   { transform: rotate(0deg); }
+    20%  { transform: rotate(14deg); }
+    40%  { transform: rotate(-10deg); }
+    60%  { transform: rotate(6deg); }
+    80%  { transform: rotate(-4deg); }
+    100% { transform: rotate(0deg); }
+  }
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50%      { transform: scale(1.15); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .icon.play * { animation: none !important; }
+  }
+</style>
+</head>
+<body>
+  <span class="icon" id="icon"></span>
+
+<script>
+// ── Icon registry ────────────────────────────────────────────────────────────
+// anim = whole-svg movement; mark drawn strokes with class="s draw" (+ "delay").
+// Paths are the official Lucide geometry (lucide.dev), 24×24 viewBox.
+const ICONS = {
+  "trending-up": {
+    anim: "bounce",
+    svg: `
+      <polyline class="s draw"       pathLength="1" points="22 7 13.5 15.5 8.5 10.5 2 17"/>
+      <polyline class="s draw delay" pathLength="1" points="16 7 22 7 22 13"/>`
+  },
+  "trending-down": {
+    anim: "bounce",
+    svg: `
+      <polyline class="s draw"       pathLength="1" points="22 17 13.5 8.5 8.5 13.5 2 7"/>
+      <polyline class="s draw delay" pathLength="1" points="16 17 22 17 22 11"/>`
+  },
+  "refresh-cw": {
+    anim: "spin",
+    svg: `
+      <path class="s" d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/>
+      <path class="s" d="M21 3v5h-5"/>
+      <path class="s" d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/>
+      <path class="s" d="M3 21v-5h5"/>`
+  },
+  "bell": {
+    anim: "swing",
+    svg: `
+      <path class="s" d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/>
+      <path class="s" d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>`
+  },
+  "activity": {
+    anim: "none",
+    svg: `
+      <path class="s draw" pathLength="1"
+            d="M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2"/>`
+  },
+  "check-circle": {
+    anim: "pulse",
+    svg: `
+      <path class="s"            d="M21.801 10A10 10 0 1 1 17 3.335"/>
+      <path class="s draw delay" pathLength="1" d="m9 11 3 3L22 4"/>`
+  }
+};
+
+// ── Parse URL params ──────────────────────────────────────────────────────────
+const p = new URLSearchParams(window.location.search);
+
+const NAME    = (p.get("icon") || "trending-up").trim();
+const SIZE    = parseInt(p.get("size") || "96", 10);
+const STROKE  = p.get("stroke") || "2";
+const TRIGGER = (p.get("trigger") || "loop").trim();
+const SPEED   = parseFloat(p.get("dur")) || 1;
+const GAP     = parseInt(p.get("gap") || "1600", 10);
+
+// Colours arrive without "#" (it's a URL fragment marker). Re-add it for hex.
+const hex = v => /^[0-9a-fA-F]{3,8}$/.test(v) ? "#" + v : v;
+const COLOR = p.get("color") ? hex(p.get("color")) : "#1e1e2e";
+if (p.get("bg")) document.body.style.setProperty("--bg", hex(p.get("bg")));
+
+// ── Build the SVG ─────────────────────────────────────────────────────────────
+const def = ICONS[NAME] || ICONS["trending-up"];
+const wrap = document.getElementById("icon");
+wrap.style.setProperty("--c", COLOR);
+wrap.style.setProperty("--sw", STROKE);
+wrap.style.setProperty("--k", SPEED);
+
+const animClass = def.anim && def.anim !== "none" ? " anim-" + def.anim : "";
+wrap.innerHTML =
+  `<svg class="ico${animClass}" width="${SIZE}" height="${SIZE}" viewBox="0 0 24 24"
+        xmlns="http://www.w3.org/2000/svg">${def.svg}</svg>`;
+
+// ── Trigger control ───────────────────────────────────────────────────────────
+// Restart CSS animations by toggling .play with a forced reflow in between.
+function play() {
+  wrap.classList.remove("play");
+  void wrap.offsetWidth;        // reflow → lets the same animation re-fire
+  wrap.classList.add("play");
+}
+
+if (TRIGGER === "hover") {
+  wrap.style.cursor = "pointer";
+  wrap.addEventListener("mouseenter", play);
+} else if (TRIGGER === "load") {
+  play();
+} else {                        // "loop" (default)
+  const cycle = 800 * SPEED + GAP;   // longest anim ≈ 0.8s, then pause
+  play();
+  setInterval(play, cycle);
+}
+
+// Click always replays — handy for testing and for click-to-animate tiles.
+wrap.addEventListener("click", play);
+</script>
+</body>
+</html>
